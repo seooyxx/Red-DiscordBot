@@ -1,13 +1,13 @@
 .DEFAULT_GOAL := help
 
-PYTHON ?= python3.8
+PYTHON ?= python3.10
 
 ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
-ifneq ($(wildcard $(ROOT_DIR)/.venv/.),)
-	VENV_PYTHON = $(ROOT_DIR)/.venv/bin/python
+ifneq ($(wildcard $(ROOT_DIR)/env/.),)
+	CONDA_PYTHON = $(ROOT_DIR)/env/bin/python
 else
-	VENV_PYTHON = $(PYTHON)
+	CONDA_PYTHON = $(PYTHON)
 endif
 
 define HELP_BODY
@@ -31,11 +31,11 @@ export HELP_BODY
 
 # Python Code Style
 reformat:
-	$(VENV_PYTHON) -m black $(ROOT_DIR)
+	$(CONDA_PYTHON) -m black $(ROOT_DIR)
 stylecheck:
-	$(VENV_PYTHON) -m black --check $(ROOT_DIR)
+	$(CONDA_PYTHON) -m black --check $(ROOT_DIR)
 stylediff:
-	$(VENV_PYTHON) -m black --check --diff $(ROOT_DIR)
+	$(CONDA_PYTHON) -m black --check --diff $(ROOT_DIR)
 
 # Translations
 gettext:
@@ -51,11 +51,10 @@ bumpdeps:
 
 # Development environment
 newenv:
-	$(PYTHON) -m venv --clear .venv
-	.venv/bin/pip install -U pip wheel
+	conda create --prefix ./env python=$(PYTHON) -y
 	$(MAKE) syncenv
 syncenv:
-	.venv/bin/pip install -Ur ./tools/dev-requirements.txt
+	conda install --prefix ./env --file ./tools/dev-requirements.txt -y
 
 # Help
 help:
